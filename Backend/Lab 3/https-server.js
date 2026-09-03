@@ -1,108 +1,161 @@
-import http, { request } from "http";
+import http from "http";
 import fs from "node:fs/promises";
-import { json } from "node:stream/consumers";
-const arr = [
-    {
-        name: "ABhi",
-        dept: "Cse",
-        classs: "Cse11",
-    },
-    {
-        name: "Abhitansu",
-        dept: "Cse",
-        classs: "Cse11",
-    },
-    {
-        name: "sonkar",
-        dept: "Cse",
-        classs: "Cse13",
-    },
-];
 
-// const filePath = "./userData.txt";
-// async function createFile(content) {
-//     try {
-//         await fs.writeFile(filePath, content, "UTF-8");
-//         console.log(`File create sucessfully:- ${content}`)
-//     }
-//     catch (error) {
-//         console.log(`Error in file ${error}`);
-//     }
-// }
-// async function appenFile() {
-//     try {
-//         await fs.appendFile(filePath, content, "UTF-8");
-//         console.log(`File create sucessfully:- ${content}`)
-//     }
-//     catch (error) {
-//         console.log(`Error in file ${error}`);
-//     }
-// }
-// createFile("Hello world");
+const port = 3001;
+const filePath = "file.txt";
 
-const server = http.createServer((req, res) => {
-    const reqUrl = req.url;
+let users = [];
+
+// Read file
+async function readFile() {
+    try {
+        const data = await fs.readFile(filePath, "utf-8");
+        return data;
+    } catch (err) {
+        console.log("Error found:", err);
+        return null;
+    }
+}
+
+// Read file content
+const content = await readFile();
+
+console.log(content);
+
+// Create server
+const server = http.createServer((req, resp) => {
+
+    const url = req.url;
     const method = req.method;
 
-    if (reqUrl === "/msg" && method === "GET") {
-        res.status = 200;
-        res.setHeader = ("Content-Type", "text/plain");
-        res.end("Welcome to backend");
-    } else if (reqUrl === "/user") {
-        res.end(JSON.stringify(arr));
-    } else if (reqUrl === "/create" && method === "POST") {
-        // let body = "";
-        // res.on("data", (content) => {
-        //     body = body + content;
-        // });
-        // const data = JSON.parse(body);
-        // const newUser = {
-        //     name: data.name,
-        //     dept: data.dept,
-        //     classs: data.classs,
-        // };
-        // res.statusCode = 201;
-        // res.setHeader("Content-Type", "application/json");
-        // arr.push(newUser);
-        // req.end(arr);
-        // res.end(
-        //     JSON.stringify({
-        //         message: "User created successfully",
-        //         user: newUser,
-        //     }),
-        // );
-         let body = "";
 
-        // Receive request body
-        req.on("data", (content) => {
-            body += content;
+    // GET /msg
+    if (url === "/msg" && method === "GET") {
+
+        resp.writeHead(200, {
+            "Content-Type": "application/json"
         });
 
-        // Body completely received
+        resp.end(JSON.stringify({
+            message: content
+        }));
+    }
+
+
+    // GET /sis
+    else if (url === "/sis" && method === "GET") {
+
+        const userData = {
+            name: "abhi",
+            id: 12,
+            class: "B.Tech"
+        };
+
+        resp.writeHead(200, {
+            "Content-Type": "application/json"
+        });
+
+        resp.end(JSON.stringify(userData));
+    }
+
+
+    // POST /create
+    else if (url === "/create" && method === "POST") {
+
+        let body = "";
+
+        // Receive data
+        req.on("data", (chunk) => {
+            body += chunk.toString();
+        });
+
+        // When data receiving is complete
         req.on("end", () => {
 
-            const data = JSON.parse(body);
+            try {
 
-            const newUser = {
-                name: data.name,
-                dept: data.dept,
-                classs: data.classs
-            };
+                const data = JSON.parse(body);
 
-            arr.push(newUser);
+                const newUser = {
+                    id: data.id,
+                    name: data.name,
+                    class: data.class
+                };
 
-            res.statusCode = 201;
-            res.setHeader("Content-Type", "application/json");
+                // Store user in array
+                users.push(newUser);
 
-            res.end(JSON.stringify("User created successfully"));
+                resp.writeHead(201, {
+                    "Content-Type": "application/json"
+                });
+
+                resp.end(JSON.stringify({
+                    message: "User created successfully",
+                    user: newUser
+                }));
+
+            } catch (error) {
+
+                resp.writeHead(400, {
+                    "Content-Type": "application/json"
+                });
+
+                resp.end(JSON.stringify({
+                    message: "Invalid JSON data"
+                }));
+            }
         });
     }
-});
-server.listen(4000, () => {
-    console.log(`Server is running on port number `);
+
+
+    // GET /users
+    else if (url === "/users" && method === "GET") {
+
+        resp.writeHead(200, {
+            "Content-Type": "application/json"
+        });
+
+        resp.end(JSON.stringify(users));
+    }
+
+    //DELETE /delete/:id
+    else if(url === "/delete" && method === "DELETE") {
+        const id=url.split("/")[2];
+        const index = userData.findIndex(user => user.id === parseInt(id));
+        if (index !== -1) {
+            userData.splice(index, 1);
+            resp.writeHead(200, {
+                "Content-Type": "application/json"
+            });
+            resp.end(JSON.stringify({
+                message: "User deleted successfully"
+            }));
+        }
+        else {
+            resp.writeHead(404, {
+                "Content-Type": "application/json"
+            });
+            resp.end(JSON.stringify({
+                message: "User not found"
+            }));
+        }
+    }
+
+    // Unknown route
+    else {
+
+        resp.writeHead(404, {
+            "Content-Type": "application/json"
+        });
+
+        resp.end(JSON.stringify({
+            message: "Route not found"
+        }));
+    }
 });
 
-// http.createServer.listen(3000,()=>{
-//    console.log("Server is running on port number 3000")
-// })
-// server.listen(3000)
+
+// Start server
+server.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
