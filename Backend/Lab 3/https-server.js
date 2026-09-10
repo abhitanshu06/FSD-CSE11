@@ -118,28 +118,96 @@ const server = http.createServer((req, resp) => {
         resp.end(JSON.stringify(users));
     }
 
-    //DELETE /delete/:id
-    else if(url === "/delete" && method === "DELETE") {
-        const id=url.split("/")[2];
-        const index = userData.findIndex(user => user.id === parseInt(id));
+    // DELETE /delete/:id
+    else if (url.startsWith("/delete/") && method === "DELETE") {
+        
+        const id = url.split("/")[2];
+        
+        const index = users.findIndex(user => user.id === parseInt(id));
+        
         if (index !== -1) {
-            userData.splice(index, 1);
-            resp.writeHead(200, {
-                "Content-Type": "application/json"
-            });
-            resp.end(JSON.stringify({
-                message: "User deleted successfully"
-            }));
-        }
-        else {
-            resp.writeHead(404, {
-                "Content-Type": "application/json"
-            });
-            resp.end(JSON.stringify({
-                message: "User not found"
-            }));
-        }
+
+        users.splice(index, 1);
+
+        resp.writeHead(200, {
+            "Content-Type": "application/json"
+        });
+
+        resp.end(JSON.stringify({
+            message: "User deleted successfully"
+        }));
+
+    } else {
+
+        resp.writeHead(404, {
+            "Content-Type": "application/json"
+        });
+
+        resp.end(JSON.stringify({
+            message: "User not found"
+        }));
     }
+}
+
+    // Edit
+else if (url.startsWith("/edit/") && method === "PUT") {
+
+    const id = url.split("/")[2];
+
+    const index = users.findIndex(user => user.id === parseInt(id));
+
+    if (index !== -1) {
+
+        let body = "";
+
+        req.on("data", (chunk) => {
+            body += chunk.toString();
+        });
+
+        req.on("end", () => {
+
+            try {
+
+                const data = JSON.parse(body);
+
+                users[index] = {
+                    id: users[index].id,
+                    name: data.name || users[index].name,
+                    class: data.class || users[index].class
+                };
+
+                resp.writeHead(200, {
+                    "Content-Type": "application/json"
+                });
+
+                resp.end(JSON.stringify({
+                    message: "User updated successfully",
+                    user: users[index]
+                }));
+
+            } catch (error) {
+
+                resp.writeHead(400, {
+                    "Content-Type": "application/json"
+                });
+
+                resp.end(JSON.stringify({
+                    message: "Invalid JSON data"
+                }));
+            }
+        });
+
+    } else {
+
+        resp.writeHead(404, {
+            "Content-Type": "application/json"
+        });
+
+        resp.end(JSON.stringify({
+            message: "User not found"
+        }));
+    }
+} 
 
     // Unknown route
     else {
