@@ -1,21 +1,20 @@
 import express from "express";
 //import dotev from "dotenv";
-import cors from "cors";
+// import cors from "cors";
 //dotev.config();
 //const port=process.env.PORT || 3000;
 const port=3000;
 const app=express();
 const userData=[
     {
-    },
-];
-
-const registerData=[
-
+        "id":1,
+        "name":"Abhi",
+        "class":"Btech"
+    }
 ];
 
 app.use(express.json());
-app.use(cors());
+// app.use(cors());
 
 app.get("/",(req,res)=>{
     res.status(200).json({
@@ -35,32 +34,35 @@ app.get("/user",(req,res)=>{
     }
 });
 
-app.get("/register",(req,res)=>{
-    try {
-        res.status(200).json({
-            message: "Data fetched successfully",
-            users: registerData
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: "Internal server error"
-        });
-    }
+app.get("/msg",(req,res)=>{
+    res.status(200).json({
+        message: "Hello from server"
+    });
 });
 
-app.get("/user/:id",(req,res)=>{
+app.get("/user/:id", (req, res) => {
     try {
-        const{name,email}=req.body;
-        const newUser={
-            id:userData.length+1,
-            name,
-            email,
-        };
-        userData.push(newUser);
-        res.status(20).json({message:"User created successfully",newUser});
-    }
-    catch(err){
-        console.error("Error: ",err.message);
+        const id = req.params.id;
+
+        const user = userData.find((u) => u.id == id);
+
+        if (user) {
+            return res.status(200).json({
+                message: "Data received",
+                user
+            });
+        }
+
+        return res.status(404).json({
+            message: "User not found"
+        });
+
+    } catch (err) {
+        console.error("Error:", err.message);
+
+        return res.status(500).json({
+            message: "Internal server error"
+        });
     }
 });
 
