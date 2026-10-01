@@ -121,13 +121,24 @@
 // }
 
 // export default App
+import { useState } from "react";
 import Postman from "./Components/api-tester";
+import AccountPage from "./Components/Signup";
 
 function App() {
-  return (
-    <>
-      <Postman />
-    </>
+  const [accountMode, setAccountMode] = useState(null);
+
+  return accountMode ? (
+    <AccountPage
+      mode={accountMode}
+      onModeChange={setAccountMode}
+      onBackToTester={() => setAccountMode(null)}
+    />
+  ) : (
+    <Postman
+      onSignup={() => setAccountMode("signup")}
+      onLogin={() => setAccountMode("login")}
+    />
   );
 }
 

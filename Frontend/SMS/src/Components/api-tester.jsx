@@ -67,7 +67,7 @@ const DEFAULT_SAVED_APIS = [
     }
 ];
 
-const Postman = () => {
+const Postman = ({ onSignup, onLogin }) => {
     // ----------------------------------------------------
     // REQUEST STATE
     // ----------------------------------------------------
@@ -460,11 +460,21 @@ const Postman = () => {
         .pm-tab-btn:hover {
           color: #ff6c37 !important;
         }
+                .pm-auth-btn:hover {
+                    background-color: #f2f4f6 !important;
+                }
+                .pm-auth-btn-primary:hover {
+                    background-color: #e85c26 !important;
+                }
       `}</style>
 
             {/* 1. TOP NAVBAR */}
             <header style={uiStyles.navbar}>
                 <span style={uiStyles.logoTitle}>API Tester</span>
+                <nav style={uiStyles.navRight} aria-label="Account">
+                    <button className="pm-auth-btn" style={uiStyles.authButton} type="button" onClick={onLogin}>Log in</button>
+                    <button className="pm-auth-btn pm-auth-btn-primary" style={{ ...uiStyles.authButton, ...uiStyles.authButtonPrimary }} type="button" onClick={onSignup}>Sign up</button>
+                </nav>
             </header>
 
             {/* MAIN LAYOUT */}
@@ -873,7 +883,7 @@ const uiStyles = {
         color: "#1e2229",
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "space-between",
         padding: "0 20px",
         borderBottom: "1px solid #e2e8f0",
         boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
@@ -885,6 +895,22 @@ const uiStyles = {
         letterSpacing: "1px",
         color: "#202124",
         textAlign: "center"
+    },
+    authButton: {
+        minHeight: "36px",
+        padding: "0 13px",
+        border: "1px solid #d7dce0",
+        borderRadius: "5px",
+        color: "#30363b",
+        backgroundColor: "#ffffff",
+        fontSize: "13px",
+        fontWeight: "600",
+        cursor: "pointer"
+    },
+    authButtonPrimary: {
+        borderColor: "#ff6c37",
+        color: "#ffffff",
+        backgroundColor: "#ff6c37"
     },
     badge: {
         fontSize: "11px",
