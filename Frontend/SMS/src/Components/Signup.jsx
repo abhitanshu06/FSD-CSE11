@@ -1,21 +1,78 @@
 import { useState } from "react";
 import "../App.css";
 
-function AccountPage({ mode, onModeChange, onBackToTester }) {
+function AccountPage({ mode, onModeChange, onBackToTester, onLoginSuccess }) {
   const [feedback, setFeedback] = useState("");
+  const [feedbackIsError, setFeedbackIsError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isLogin = mode === "login";
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    setFeedback(
-      isLogin
-        ? "Login form is ready to connect to your authentication API."
-        : "Signup form is ready to connect to your account API.",
-    );
+    setFeedback("");
+    setFeedbackIsError(false);
+
+    const formData = new FormData(event.currentTarget);
+    const name = String(formData.get("name") || "").trim();
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "");
+
+    if ((!isLogin && !name) || !email || !password) {
+      setFeedback("Please fill in all fields.");
+      setFeedbackIsError(true);
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      setFeedback("Enter a valid email address.");
+      setFeedbackIsError(true);
+      return;
+    }
+    if (!isLogin && password.length < 6) {
+      setFeedback("Password must be at least 6 characters.");
+      setFeedbackIsError(true);
+      return;
+    }
+
+    setIsSubmitting(true);
+    const payload = {
+      email,
+      password,
+    };
+    if (!isLogin) payload.name = name;
+
+    let loggedInUser = null;
+    try {
+      const response = await fetch(`/api/auth/${isLogin ? "login" : "signup"}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Request failed.");
+
+      if (isLogin) {
+        localStorage.setItem("api_tester_token", result.token);
+        loggedInUser = result.user;
+      } else {
+        setFeedback(result.message);
+      }
+    } catch (error) {
+      setFeedback(
+        error instanceof TypeError
+          ? "Could not reach the auth API. Start the backend and try again."
+          : error.message,
+      );
+      setFeedbackIsError(true);
+    } finally {
+      setIsSubmitting(false);
+    }
+
+    if (loggedInUser) onLoginSuccess(loggedInUser);
   }
 
   function changeMode(nextMode) {
     setFeedback("");
+    setFeedbackIsError(false);
     onModeChange(nextMode);
   }
 
@@ -48,7 +105,7 @@ function AccountPage({ mode, onModeChange, onBackToTester }) {
             </button>
           </div>
 
-          <form className="account-form" onSubmit={handleSubmit}>
+          <form className="account-form" onSubmit={handleSubmit} noValidate>
             {!isLogin && (
               <>
                 <label htmlFor="full-name">Full name</label>
@@ -78,16 +135,20 @@ function AccountPage({ mode, onModeChange, onBackToTester }) {
               id="password"
               name="password"
               type="password"
-              placeholder={isLogin ? "Your password" : "At least 8 characters"}
+              placeholder={isLogin ? "Your password" : "At least 6 characters"}
               autoComplete={isLogin ? "current-password" : "new-password"}
-              minLength={isLogin ? undefined : 8}
+              minLength={isLogin ? undefined : 6}
               required
             />
 
-            <button className="account-submit" type="submit">
-              {isLogin ? "Log in" : "Sign up"}
+            <button className="account-submit" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Please wait..." : isLogin ? "Log in" : "Sign up"}
             </button>
-            {feedback && <p className="account-feedback" role="status">{feedback}</p>}
+            {feedback && (
+              <p className={feedbackIsError ? "account-feedback error" : "account-feedback"} role={feedbackIsError ? "alert" : "status"}>
+                {feedback}
+              </p>
+            )}
           </form>
 
           <button className="account-back" type="button" onClick={onBackToTester}>

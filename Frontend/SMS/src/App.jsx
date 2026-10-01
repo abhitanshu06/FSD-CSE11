@@ -122,23 +122,68 @@
 
 // export default App
 import { useState } from "react";
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Postman from "./Components/api-tester";
 import AccountPage from "./Components/Signup";
 
-function App() {
-  const [accountMode, setAccountMode] = useState(null);
+function AppRoutes() {
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("api_tester_user") || "null");
+    } catch {
+      return null;
+    }
+  });
 
-  return accountMode ? (
-    <AccountPage
-      mode={accountMode}
-      onModeChange={setAccountMode}
-      onBackToTester={() => setAccountMode(null)}
-    />
-  ) : (
-    <Postman
-      onSignup={() => setAccountMode("signup")}
-      onLogin={() => setAccountMode("login")}
-    />
+  function handleLoginSuccess(user) {
+    localStorage.setItem("api_tester_user", JSON.stringify(user));
+    setCurrentUser(user);
+    navigate("/");
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("api_tester_token");
+    localStorage.removeItem("api_tester_user");
+    setCurrentUser(null);
+  }
+
+  function accountPage(mode) {
+    return (
+      <AccountPage
+        mode={mode}
+        onModeChange={(nextMode) => navigate(nextMode === "login" ? "/login" : "/signup")}
+        onBackToTester={() => navigate("/")}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    );
+  }
+
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <Postman
+            currentUser={currentUser}
+            onSignup={() => navigate("/signup")}
+            onLogin={() => navigate("/login")}
+            onLogout={handleLogout}
+          />
+        }
+      />
+      <Route path="/signup" element={accountPage("signup")} />
+      <Route path="/login" element={accountPage("login")} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
 

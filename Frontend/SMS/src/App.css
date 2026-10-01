@@ -124,6 +124,15 @@
   line-height: 1.5;
 }
 
+.account-feedback.error {
+  color: #b42318;
+}
+
+.account-submit:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
 .account-back {
   display: block;
   margin: 18px auto 0;

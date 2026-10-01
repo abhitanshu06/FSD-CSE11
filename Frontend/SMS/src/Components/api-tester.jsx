@@ -67,7 +67,8 @@ const DEFAULT_SAVED_APIS = [
     }
 ];
 
-const Postman = ({ onSignup, onLogin }) => {
+const Postman = ({ currentUser, onSignup, onLogin, onLogout }) => {
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
     // ----------------------------------------------------
     // REQUEST STATE
     // ----------------------------------------------------
@@ -466,14 +467,83 @@ const Postman = ({ onSignup, onLogin }) => {
                 .pm-auth-btn-primary:hover {
                     background-color: #e85c26 !important;
                 }
+                .pm-profile-menu {
+                    position: absolute;
+                    top: calc(100% + 8px);
+                    right: 0;
+                    z-index: 20;
+                    min-width: 210px;
+                    padding: 12px;
+                    border: 1px solid #e1e5e9;
+                    border-radius: 6px;
+                    background: #ffffff;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+                }
+                .pm-profile-name {
+                    color: #202124;
+                    font-size: 13px;
+                    font-weight: 600;
+                }
+                .pm-profile-email {
+                    overflow: hidden;
+                    margin-top: 3px;
+                    color: #697078;
+                    font-size: 12px;
+                    text-overflow: ellipsis;
+                }
+                .pm-profile-logout {
+                    width: 100%;
+                    margin-top: 10px;
+                    padding: 8px 0 2px;
+                    border: 0;
+                    border-top: 1px solid #e8eaed;
+                    color: #b42318;
+                    background: transparent;
+                    font-size: 13px;
+                    text-align: left;
+                    cursor: pointer;
+                }
       `}</style>
 
             {/* 1. TOP NAVBAR */}
             <header style={uiStyles.navbar}>
                 <span style={uiStyles.logoTitle}>API Tester</span>
                 <nav style={uiStyles.navRight} aria-label="Account">
-                    <button className="pm-auth-btn" style={uiStyles.authButton} type="button" onClick={onLogin}>Log in</button>
-                    <button className="pm-auth-btn pm-auth-btn-primary" style={{ ...uiStyles.authButton, ...uiStyles.authButtonPrimary }} type="button" onClick={onSignup}>Sign up</button>
+                    {currentUser ? (
+                        <div style={{ position: "relative" }}>
+                            <button
+                                className="pm-auth-btn"
+                                style={uiStyles.authButton}
+                                type="button"
+                                aria-expanded={isProfileOpen}
+                                aria-controls="profile-menu"
+                                onClick={() => setIsProfileOpen((isOpen) => !isOpen)}
+                            >
+                                Profile
+                            </button>
+                            {isProfileOpen && (
+                                <div className="pm-profile-menu" id="profile-menu">
+                                    <div className="pm-profile-name">{currentUser.name}</div>
+                                    <div className="pm-profile-email">{currentUser.email}</div>
+                                    <button
+                                        className="pm-profile-logout"
+                                        type="button"
+                                        onClick={() => {
+                                            setIsProfileOpen(false);
+                                            onLogout();
+                                        }}
+                                    >
+                                        Log out
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <>
+                            <button className="pm-auth-btn" style={uiStyles.authButton} type="button" onClick={onLogin}>Log in</button>
+                            <button className="pm-auth-btn pm-auth-btn-primary" style={{ ...uiStyles.authButton, ...uiStyles.authButtonPrimary }} type="button" onClick={onSignup}>Sign up</button>
+                        </>
+                    )}
                 </nav>
             </header>
 
