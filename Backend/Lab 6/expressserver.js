@@ -1,9 +1,8 @@
 import express from "express";
+import cors from "cors";
 //import dotev from "dotenv";
-// import cors from "cors";
 //dotev.config();
-//const port=process.env.PORT || 3000;
-const port=3000;
+const port=process.env.PORT || 3000;
 const app=express();
 const userData=[
     {
@@ -12,9 +11,10 @@ const userData=[
         "class":"Btech"
     }
 ];
+const registerData=[];
 
 app.use(express.json());
-// app.use(cors());
+app.use(cors());
 
 app.get("/",(req,res)=>{
     res.status(200).json({

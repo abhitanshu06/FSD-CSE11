@@ -10,5 +10,29 @@
     "name": "Abhi",
     "email": "abhitanshu2007@gmail.com",
     "passwordHash": "Abc@123"
+  },
+  {
+    "id": "d177a1c4-690d-45fe-901a-d93dbb885e10",
+    "name": "abh",
+    "email": "abhitanshu0706@gmail.com",
+    "passwordHash": "$2b$10$Hisx3bKyjYZ2AjCvGYJvWOk34FPraPkV5STuTxY5ipleAmjU3Hz7S"
+  },
+  {
+    "id": "2fe76226-10ad-4514-9ef7-5e1c5cc82091",
+    "name": "Test User",
+    "email": "demo1791038153115@example.com",
+    "passwordHash": "$2b$10$uv2xjPl1ayL7pmK2JmRcnOfH89U/MpGPzJpGnUgz3FmVmjdlzxE8."
+  },
+  {
+    "id": "809f02d0-abac-43e5-b234-26d6011ff2d9",
+    "name": "Abhitanshu",
+    "email": "ishugamer15@gmail.com",
+    "passwordHash": "$2b$10$zs.h9k60dV9kBiPRqDtnxeZq7d/vbTIyc//aO.b1atLYxPCeqO7nm"
+  },
+  {
+    "id": "0e046fec-fd07-4036-bc57-c85f4bd3d622",
+    "name": "iSHU",
+    "email": "abhitanshu.25b01010681@abes.ac.in",
+    "passwordHash": "$2b$10$8zM1ky4jT3kcwmHJT.ljVuBRernGMQG.wE.Mx1/FxNMmxzbpqaBsq"
   }
 ]
